@@ -100,6 +100,59 @@ Open http://localhost:3001.
 - Relevant env vars: `JWT_SECRET`, `PORT`, `DB_PATH` (defaults to `/app/data/chores.db`),
   `CLIENT_DIST` (defaults to `/app/public`).
 
+## Updating without losing data
+
+Your data lives in the **`chores-data` Docker volume** (mounted at `/app/data`), which is
+independent of the image and the container. Pulling a new image and recreating the
+container reuses that volume, so **your data is preserved**. Schema changes ship as
+*additive* migrations (new columns only — existing rows are never dropped or rewritten).
+
+**Safe update from Docker Hub:**
+
+```bash
+docker compose pull      # fetch the latest image
+docker compose up -d     # recreate the container; the volume is kept
+```
+
+**Or, if you build locally:**
+
+```bash
+git pull
+docker compose up --build -d
+```
+
+**Do this, not that:**
+
+- ✅ `docker compose down` then `up -d` — keeps the volume (safe).
+- ❌ `docker compose down -v` or `docker volume rm chores-data` — **deletes the volume and
+  all data.** The `-v` flag is the main way to lose data.
+- If you use plain `docker run`, **always** pass the volume, or the database is written to
+  the container's throwaway layer and is lost on the next update:
+  ```bash
+  docker run -p 3001:3001 -v chores-data:/app/data razorhazor/choresapp:latest
+  ```
+
+## Backups
+
+Take a consistent snapshot any time (safe while the app is running) and copy it to the host:
+
+```bash
+docker compose exec app node -e "require('better-sqlite3')(process.env.DB_PATH).exec(\"VACUUM INTO '/app/data/backup.db'\")"
+docker compose cp app:/app/data/backup.db ./chores-backup-$(date +%Y%m%d).db
+```
+
+Restore a backup:
+
+```bash
+docker compose stop app
+docker compose cp ./chores-backup-YYYYMMDD.db app:/app/data/chores.db
+# clear stale WAL/SHM so SQLite reads the restored file cleanly:
+docker compose run --rm --no-deps --entrypoint sh app -c 'rm -f /app/data/chores.db-wal /app/data/chores.db-shm'
+docker compose up -d
+```
+
+It's good practice to take a backup before any major update.
+
 ## First login (seeded parent account)
 
 On its **first run** the backend creates a single parent account and prints the

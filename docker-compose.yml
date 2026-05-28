@@ -1,7 +1,11 @@
 services:
   app:
+    # `docker compose up --build` builds locally; `docker compose pull` fetches
+    # this published image from Docker Hub. Either way the data volume below is
+    # preserved across updates.
     build: .
-    image: choresapp
+    image: razorhazor/choresapp:latest
+    pull_policy: missing
     ports:
       - "3001:3001"
     environment:
