@@ -1,0 +1,63 @@
+<?xml version="1.0"?>
+<Container version="2">
+  <Name>ChoreQuest</Name>
+  <Repository>razorhazor/choresapp:latest</Repository>
+  <Registry>https://hub.docker.com/r/razorhazor/choresapp</Registry>
+  <Network>bridge</Network>
+  <MyIP/>
+  <Shell>sh</Shell>
+  <Privileged>false</Privileged>
+  <Support>https://github.com/razorhazor/choresapp/issues</Support>
+  <Project>https://github.com/razorhazor/choresapp</Project>
+  <Overview>Mobile-first family chores &amp; rewards app. Parents create chores with financial or custom rewards and approve completions; children log in to see their chores, mark them done, and track rewards earned per month. Self-contained Node/Express + SQLite, served on a single port.</Overview>
+  <Category>HomeAutomation:</Category>
+  <WebUI>http://[IP]:[PORT:3001]/</WebUI>
+  <TemplateURL/>
+  <Icon/>
+  <ExtraParams/>
+  <PostArgs/>
+  <CPUset/>
+  <DateInstalled/>
+  <DonateText/>
+  <DonateLink/>
+  <Description>Mobile-first family chores &amp; rewards app (Node/Express + SQLite). First run seeds a parent account (login "parent" / password "password123", printed in the container log) — change it on the app's Account page or set the Initial Parent Password below. IMPORTANT: the database is SQLite in WAL mode, so point App Data at a cache-backed appdata share (or a /mnt/cache/... path); SQLite on a multi-disk /mnt/user FUSE path or a network share can corrupt. Your data persists in the App Data path across image updates.</Description>
+  <Networking>
+    <Mode>bridge</Mode>
+    <Publish>
+      <Port>
+        <HostPort>3001</HostPort>
+        <ContainerPort>3001</ContainerPort>
+        <Protocol>tcp</Protocol>
+      </Port>
+    </Publish>
+  </Networking>
+  <Data>
+    <Volume>
+      <HostDir>/mnt/user/appdata/choresapp</HostDir>
+      <ContainerDir>/app/data</ContainerDir>
+      <Mode>rw</Mode>
+    </Volume>
+  </Data>
+  <Environment>
+    <Variable>
+      <Value/>
+      <Name>SEED_PARENT_PASSWORD</Name>
+      <Mode/>
+    </Variable>
+    <Variable>
+      <Value/>
+      <Name>JWT_SECRET</Name>
+      <Mode/>
+    </Variable>
+    <Variable>
+      <Value>false</Value>
+      <Name>COOKIE_SECURE</Name>
+      <Mode/>
+    </Variable>
+  </Environment>
+  <Config Name="WebUI Port" Target="3001" Default="3001" Mode="tcp" Description="Host port for the web UI. The container always listens on 3001." Type="Port" Display="always" Required="true" Mask="false">3001</Config>
+  <Config Name="App Data" Target="/app/data" Default="/mnt/user/appdata/choresapp" Mode="rw" Description="Persistent SQLite database (and the generated JWT secret). Use a cache-backed appdata share or a /mnt/cache/... path — avoid multi-disk /mnt/user FUSE or network shares for SQLite/WAL. Survives image updates." Type="Path" Display="always" Required="true" Mask="false">/mnt/user/appdata/choresapp</Config>
+  <Config Name="Initial Parent Password" Target="SEED_PARENT_PASSWORD" Default="" Mode="" Description="Password for the seeded 'parent' account, used on FIRST run only. Leave blank to use the default 'password123' (then change it in-app)." Type="Variable" Display="always" Required="false" Mask="true"/>
+  <Config Name="JWT Secret" Target="JWT_SECRET" Default="" Mode="" Description="Optional. Token signing secret. Leave blank to auto-generate and persist one in the App Data path. Set explicitly only for multi-instance deployments." Type="Variable" Display="advanced" Required="false" Mask="true"/>
+  <Config Name="Secure Cookie (HTTPS)" Target="COOKIE_SECURE" Default="false" Mode="" Description="Set to true when serving over HTTPS (e.g. behind a reverse proxy) so the auth cookie is only sent over HTTPS." Type="Variable" Display="advanced" Required="false" Mask="false">false</Config>
+</Container>
