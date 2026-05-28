@@ -115,7 +115,14 @@ export default function ChildrenPage() {
                   {c.monthly.map((m) => (
                     <li key={m.month} className="monthly-row">
                       <span>{formatMonth(m.month)}</span>
-                      <span className="reward-pill">{formatReward(m.total)}</span>
+                      <span className="monthly-amounts">
+                        {(m.total > 0 || m.customCount === 0) && (
+                          <span className="reward-pill">{formatReward(m.total)}</span>
+                        )}
+                        {m.customCount > 0 && (
+                          <span className="reward-pill reward-pill-custom">🎁 {m.customCount}</span>
+                        )}
+                      </span>
                     </li>
                   ))}
                 </ul>

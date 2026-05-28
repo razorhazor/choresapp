@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { api } from '../api.js';
-import { formatReward } from '../config.js';
+import { rewardLabel } from '../config.js';
 import AppHeader from '../components/AppHeader.jsx';
 import StatusBadge from '../components/StatusBadge.jsx';
 
@@ -95,7 +95,9 @@ export default function ParentDashboard() {
             <article key={chore.id} className="card chore-card">
               <div className="chore-card-top">
                 <h3>{chore.name}</h3>
-                <span className="reward-pill">{formatReward(chore.reward_amount)}</span>
+                <span className={`reward-pill${chore.reward_type === 'custom' ? ' reward-pill-custom' : ''}`}>
+                  {rewardLabel(chore.reward_type, chore.reward_amount, chore.reward_text)}
+                </span>
               </div>
               {chore.description && <p className="muted">{chore.description}</p>}
               <div className="chore-card-meta">

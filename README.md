@@ -137,6 +137,9 @@ Child accounts are created from the app: log in as the parent → **Children** �
   chores (name, description, due date, reward), assigns each chore to one or more children,
   and approves or rejects submitted completions. Approving releases the reward; rejecting
   sends the chore back to `pending` so the child can redo it.
+  - **Reward types:** each chore has either a **financial** reward (a `£` amount) or a
+    **custom** reward (free text, e.g. "Extra screen time"). Financial rewards are summed
+    into the money totals; approved custom rewards are tallied (counted) alongside them.
 - **Child** logs in with username + password, sees only their own chores sorted by due
   date, marks a chore complete (which moves it to *awaiting approval* — no instant credit),
   views their running reward total, a breakdown of rewards earned per calendar month,

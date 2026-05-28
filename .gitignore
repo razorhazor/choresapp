@@ -1,0 +1,22 @@
+# OS files
+.DS_Store
+**/.DS_Store
+
+# Dependencies (also covered by client/ and server/ .gitignore)
+node_modules/
+**/node_modules/
+
+# Build output
+dist/
+**/dist/
+**/.vite/
+
+# Local SQLite database
+server/chores.db
+server/chores.db-wal
+server/chores.db-shm
+server/chores.db-journal
+
+# Environment
+.env
+**/.env

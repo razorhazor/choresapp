@@ -28,7 +28,10 @@ function initSchema() {
       name          TEXT NOT NULL,
       description   TEXT NOT NULL DEFAULT '',
       due_date      TEXT,
+      reward_type   TEXT NOT NULL DEFAULT 'financial'
+                      CHECK (reward_type IN ('financial', 'custom')),
       reward_amount REAL NOT NULL DEFAULT 0,
+      reward_text   TEXT,
       created_by    INTEGER NOT NULL REFERENCES users(id),
       created_at    TEXT NOT NULL DEFAULT (datetime('now'))
     );
@@ -47,6 +50,19 @@ function initSchema() {
     CREATE INDEX IF NOT EXISTS idx_assignments_child ON chore_assignments(child_id);
     CREATE INDEX IF NOT EXISTS idx_assignments_chore ON chore_assignments(chore_id);
   `);
+}
+
+// Additive migrations for databases created before a column existed.
+// These never drop or rewrite existing data — they only add columns,
+// defaulting existing chores to the 'financial' reward type.
+function migrate() {
+  const choreCols = db.prepare(`PRAGMA table_info(chores)`).all().map((c) => c.name);
+  if (!choreCols.includes('reward_type')) {
+    db.exec(`ALTER TABLE chores ADD COLUMN reward_type TEXT NOT NULL DEFAULT 'financial'`);
+  }
+  if (!choreCols.includes('reward_text')) {
+    db.exec(`ALTER TABLE chores ADD COLUMN reward_text TEXT`);
+  }
 }
 
 // Seed a single parent account on first run so the app is usable immediately.
@@ -69,6 +85,7 @@ function seed() {
 }
 
 initSchema();
+migrate();
 seed();
 
 export default db;

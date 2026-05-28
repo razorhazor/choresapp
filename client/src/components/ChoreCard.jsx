@@ -1,5 +1,5 @@
 import StatusBadge from './StatusBadge.jsx';
-import { formatReward } from '../config.js';
+import { rewardLabel } from '../config.js';
 
 function formatDate(d) {
   if (!d) return 'No due date';
@@ -18,7 +18,9 @@ export default function ChoreCard({ chore, onComplete, busy }) {
     <article className="card chore-card">
       <div className="chore-card-top">
         <h3>{chore.name}</h3>
-        <span className="reward-pill">{formatReward(chore.rewardAmount)}</span>
+        <span className={`reward-pill${chore.rewardType === 'custom' ? ' reward-pill-custom' : ''}`}>
+          {rewardLabel(chore.rewardType, chore.rewardAmount, chore.rewardText)}
+        </span>
       </div>
       {chore.description && <p className="muted">{chore.description}</p>}
       <div className="chore-card-meta">

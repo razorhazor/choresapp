@@ -23,12 +23,20 @@ function parseChoreBody(body) {
   const name = (body?.name || '').trim();
   const description = (body?.description || '').trim();
   const due_date = body?.due_date ? String(body.due_date) : null;
-  const reward_amount = Number(body?.reward_amount);
+  const reward_type = body?.reward_type === 'custom' ? 'custom' : 'financial';
   if (!name) return { error: 'Chore name is required' };
+
+  if (reward_type === 'custom') {
+    const reward_text = (body?.reward_text || '').trim();
+    if (!reward_text) return { error: 'Enter the custom reward' };
+    return { name, description, due_date, reward_type, reward_amount: 0, reward_text };
+  }
+
+  const reward_amount = Number(body?.reward_amount);
   if (!Number.isFinite(reward_amount) || reward_amount < 0) {
     return { error: 'Reward must be a non-negative number' };
   }
-  return { name, description, due_date, reward_amount };
+  return { name, description, due_date, reward_type, reward_amount, reward_text: null };
 }
 
 // ---- Parent: list every chore with its per-child assignment status ----
@@ -80,10 +88,18 @@ router.post('/chores', parentOnly, (req, res) => {
   const create = db.transaction(() => {
     const info = db
       .prepare(
-        `INSERT INTO chores (name, description, due_date, reward_amount, created_by)
-         VALUES (?, ?, ?, ?, ?)`
+        `INSERT INTO chores (name, description, due_date, reward_type, reward_amount, reward_text, created_by)
+         VALUES (?, ?, ?, ?, ?, ?, ?)`
       )
-      .run(parsed.name, parsed.description, parsed.due_date, parsed.reward_amount, req.user.id);
+      .run(
+        parsed.name,
+        parsed.description,
+        parsed.due_date,
+        parsed.reward_type,
+        parsed.reward_amount,
+        parsed.reward_text,
+        req.user.id
+      );
     const choreId = info.lastInsertRowid;
     const insertAssign = db.prepare(
       `INSERT INTO chore_assignments (chore_id, child_id) VALUES (?, ?)`
@@ -111,8 +127,17 @@ router.put('/chores/:id', parentOnly, (req, res) => {
 
   const update = db.transaction(() => {
     db.prepare(
-      `UPDATE chores SET name = ?, description = ?, due_date = ?, reward_amount = ? WHERE id = ?`
-    ).run(parsed.name, parsed.description, parsed.due_date, parsed.reward_amount, id);
+      `UPDATE chores SET name = ?, description = ?, due_date = ?,
+              reward_type = ?, reward_amount = ?, reward_text = ? WHERE id = ?`
+    ).run(
+      parsed.name,
+      parsed.description,
+      parsed.due_date,
+      parsed.reward_type,
+      parsed.reward_amount,
+      parsed.reward_text,
+      id
+    );
 
     const current = db
       .prepare('SELECT child_id FROM chore_assignments WHERE chore_id = ?')
@@ -151,7 +176,8 @@ router.get('/chores/mine', childOnly, (req, res) => {
       `SELECT a.id AS assignmentId, a.status, a.submitted_at AS submittedAt,
               a.approved_at AS approvedAt,
               c.id AS choreId, c.name, c.description, c.due_date AS dueDate,
-              c.reward_amount AS rewardAmount
+              c.reward_type AS rewardType, c.reward_amount AS rewardAmount,
+              c.reward_text AS rewardText
          FROM chore_assignments a
          JOIN chores c ON c.id = a.chore_id
         WHERE a.child_id = ?

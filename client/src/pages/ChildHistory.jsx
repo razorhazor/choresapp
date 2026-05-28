@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../api.js';
-import { formatReward } from '../config.js';
+import { rewardLabel } from '../config.js';
 import AppHeader from '../components/AppHeader.jsx';
 import StatusBadge from '../components/StatusBadge.jsx';
 
@@ -54,7 +54,9 @@ export default function ChildHistory() {
                 </div>
               </div>
               <div className="history-right">
-                <span className="reward-pill">{formatReward(c.rewardAmount)}</span>
+                <span className={`reward-pill${c.rewardType === 'custom' ? ' reward-pill-custom' : ''}`}>
+                  {rewardLabel(c.rewardType, c.rewardAmount, c.rewardText)}
+                </span>
                 <StatusBadge status={c.status} />
               </div>
             </li>

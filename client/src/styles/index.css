@@ -307,6 +307,54 @@ textarea:focus {
   border-radius: 999px;
   white-space: nowrap;
 }
+/* Custom (free-text) reward — distinct colour, allowed to wrap */
+.reward-pill-custom {
+  background: var(--secondary);
+  color: var(--secondary-text);
+  white-space: normal;
+}
+.custom-tally {
+  margin-top: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 4px 12px;
+  border-radius: 999px;
+}
+.monthly-amounts {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+/* Segmented control — reward type chooser */
+.segmented {
+  display: flex;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  margin-top: 6px;
+}
+.segmented-option {
+  flex: 1;
+  min-height: var(--tap);
+  border: none;
+  background: #fff;
+  color: var(--text);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.segmented-option + .segmented-option {
+  border-left: 1px solid var(--border);
+}
+.segmented-option.active {
+  background: var(--primary);
+  color: #fff;
+}
 
 /* ---------- Chore cards ---------- */
 .chore-card-top {
@@ -314,6 +362,10 @@ textarea:focus {
   align-items: flex-start;
   justify-content: space-between;
   gap: 10px;
+}
+.chore-card-top h3 {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 .chore-card-meta {
   display: flex;

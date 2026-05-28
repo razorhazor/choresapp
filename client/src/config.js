@@ -11,6 +11,11 @@ export function formatReward(amount) {
   return `${CURRENCY}${Number(amount || 0).toFixed(2)}`;
 }
 
+// Display label for a chore reward, whichever type it is.
+export function rewardLabel(type, amount, text) {
+  return type === 'custom' ? `🎁 ${text || 'Custom reward'}` : formatReward(amount);
+}
+
 // Turns a 'YYYY-MM' month key into a readable label like "May 2026".
 export function formatMonth(ym) {
   const [year, month] = ym.split('-').map(Number);

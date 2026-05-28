@@ -51,6 +51,12 @@ export default function ChildDashboard() {
       <section className="reward-banner card">
         <span className="muted">Earned this month</span>
         <strong className="reward-total">{formatReward(user.currentMonthTotal)}</strong>
+        {user.currentMonthCustomCount > 0 && (
+          <span className="custom-tally">
+            🎁 {user.currentMonthCustomCount} custom reward
+            {user.currentMonthCustomCount > 1 ? 's' : ''}
+          </span>
+        )}
       </section>
 
       <div className="row-between">
@@ -87,7 +93,14 @@ export default function ChildDashboard() {
             {user.monthly.map((m) => (
               <li key={m.month} className="monthly-row">
                 <span>{formatMonth(m.month)}</span>
-                <span className="reward-pill">{formatReward(m.total)}</span>
+                <span className="monthly-amounts">
+                  {(m.total > 0 || m.customCount === 0) && (
+                    <span className="reward-pill">{formatReward(m.total)}</span>
+                  )}
+                  {m.customCount > 0 && (
+                    <span className="reward-pill reward-pill-custom">🎁 {m.customCount}</span>
+                  )}
+                </span>
               </li>
             ))}
           </ul>

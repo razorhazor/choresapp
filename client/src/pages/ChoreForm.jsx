@@ -13,7 +13,9 @@ export default function ChoreForm() {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [dueDate, setDueDate] = useState('');
+  const [rewardType, setRewardType] = useState('financial');
   const [reward, setReward] = useState('');
+  const [rewardText, setRewardText] = useState('');
   const [selected, setSelected] = useState(new Set());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -34,7 +36,9 @@ export default function ChoreForm() {
             setName(chore.name);
             setDescription(chore.description || '');
             setDueDate(chore.due_date || '');
-            setReward(String(chore.reward_amount));
+            setRewardType(chore.reward_type || 'financial');
+            setReward(chore.reward_type === 'custom' ? '' : String(chore.reward_amount));
+            setRewardText(chore.reward_text || '');
             setSelected(new Set(chore.assignments.map((a) => a.childId)));
           }
         }
@@ -62,12 +66,18 @@ export default function ChoreForm() {
       setError('Assign the chore to at least one child');
       return;
     }
+    if (rewardType === 'custom' && !rewardText.trim()) {
+      setError('Enter the custom reward');
+      return;
+    }
     setBusy(true);
     const payload = {
       name: name.trim(),
       description: description.trim(),
       due_date: dueDate || null,
-      reward_amount: Number(reward || 0),
+      reward_type: rewardType,
+      reward_amount: rewardType === 'financial' ? Number(reward || 0) : 0,
+      reward_text: rewardType === 'custom' ? rewardText.trim() : null,
       child_ids: [...selected],
     };
     try {
@@ -123,18 +133,54 @@ export default function ChoreForm() {
             onChange={(e) => setDueDate(e.target.value)}
           />
 
-          <label htmlFor="reward">Reward ({CURRENCY})</label>
-          <input
-            id="reward"
-            type="number"
-            min="0"
-            step="0.01"
-            inputMode="decimal"
-            value={reward}
-            onChange={(e) => setReward(e.target.value)}
-            placeholder="0.00"
-            required
-          />
+          <label>Reward type</label>
+          <div className="segmented" role="group" aria-label="Reward type">
+            <button
+              type="button"
+              className={`segmented-option${rewardType === 'financial' ? ' active' : ''}`}
+              aria-pressed={rewardType === 'financial'}
+              onClick={() => setRewardType('financial')}
+            >
+              Financial
+            </button>
+            <button
+              type="button"
+              className={`segmented-option${rewardType === 'custom' ? ' active' : ''}`}
+              aria-pressed={rewardType === 'custom'}
+              onClick={() => setRewardType('custom')}
+            >
+              Custom reward
+            </button>
+          </div>
+
+          {rewardType === 'financial' ? (
+            <>
+              <label htmlFor="reward">Reward ({CURRENCY})</label>
+              <input
+                id="reward"
+                type="number"
+                min="0"
+                step="0.01"
+                inputMode="decimal"
+                value={reward}
+                onChange={(e) => setReward(e.target.value)}
+                placeholder="0.00"
+                required
+              />
+            </>
+          ) : (
+            <>
+              <label htmlFor="rewardText">Custom reward</label>
+              <input
+                id="rewardText"
+                type="text"
+                value={rewardText}
+                onChange={(e) => setRewardText(e.target.value)}
+                placeholder="e.g. Extra screen time"
+                required
+              />
+            </>
+          )}
 
           <fieldset className="assign-fieldset">
             <legend>Assign to</legend>
