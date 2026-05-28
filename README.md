@@ -110,9 +110,10 @@ Email:    parent@home.com
 Password: password123
 ```
 
-**Change this password after logging in is not yet a feature — instead, treat these as
-development credentials.** For real use, reset the database (below) and create your own
-parent, or edit the seed in `server/db.js` before the first run.
+**Change this password after logging in** via the in-app **Account** page (top-right of
+any screen) — both parents and children can change their own password there. For a fresh
+deployment you can also set `SEED_PARENT_PASSWORD` before the first run (below) so the
+default is never used.
 
 ### Recreating / resetting the first parent account
 

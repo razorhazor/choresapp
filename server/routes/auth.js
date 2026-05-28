@@ -146,5 +146,32 @@ router.get('/me', authMiddleware, (req, res) => {
   res.json({ user: publicUser(user) });
 });
 
+// Change the logged-in user's own password (parent or child). Requires the
+// current password as confirmation.
+router.post('/change-password', authMiddleware, (req, res) => {
+  const { currentPassword, newPassword } = req.body || {};
+  if (
+    !currentPassword ||
+    !newPassword ||
+    typeof currentPassword !== 'string' ||
+    typeof newPassword !== 'string'
+  ) {
+    return res.status(400).json({ error: 'Current and new password are required' });
+  }
+  if (newPassword.length < 4 || newPassword.length > 200) {
+    return res.status(400).json({ error: 'New password must be 4-200 characters' });
+  }
+
+  const user = db.prepare('SELECT * FROM users WHERE id = ?').get(req.user.id);
+  if (!user) return res.status(401).json({ error: 'Not authenticated' });
+  if (!bcrypt.compareSync(currentPassword, user.password_hash)) {
+    return res.status(400).json({ error: 'Current password is incorrect' });
+  }
+
+  const hash = bcrypt.hashSync(newPassword, 10);
+  db.prepare('UPDATE users SET password_hash = ? WHERE id = ?').run(hash, user.id);
+  res.json({ ok: true });
+});
+
 export { rewardTotal, monthlyTotals, publicUser };
 export default router;

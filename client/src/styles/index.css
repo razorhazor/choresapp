@@ -118,6 +118,12 @@ p {
 .app-header-text p {
   margin: 2px 0 0;
 }
+.app-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
 
 /* ---------- Cards ---------- */
 .card {
@@ -258,6 +264,11 @@ textarea:focus {
 .error-text {
   color: var(--danger);
   font-weight: 500;
+  margin-top: 10px;
+}
+.success-text {
+  color: var(--success);
+  font-weight: 600;
   margin-top: 10px;
 }
 

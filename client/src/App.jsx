@@ -7,6 +7,7 @@ import ChildrenPage from './pages/ChildrenPage.jsx';
 import ChoreForm from './pages/ChoreForm.jsx';
 import ChildDashboard from './pages/ChildDashboard.jsx';
 import ChildHistory from './pages/ChildHistory.jsx';
+import SettingsPage from './pages/SettingsPage.jsx';
 
 // Sends a logged-in user to their home, otherwise to login.
 function HomeRedirect() {
@@ -67,6 +68,15 @@ export default function App() {
         element={
           <ProtectedRoute role="child">
             <ChildHistory />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/settings"
+        element={
+          <ProtectedRoute>
+            <SettingsPage />
           </ProtectedRoute>
         }
       />
