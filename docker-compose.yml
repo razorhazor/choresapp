@@ -1,0 +1,18 @@
+services:
+  app:
+    build: .
+    image: choresapp
+    ports:
+      - "3001:3001"
+    environment:
+      # CHANGE THIS to a strong random value in production.
+      JWT_SECRET: redacted-placeholder
+      PORT: "3001"
+      DB_PATH: /app/data/chores.db
+    volumes:
+      # Persists the SQLite database across container restarts/rebuilds.
+      - chores-data:/app/data
+    restart: unless-stopped
+
+volumes:
+  chores-data:

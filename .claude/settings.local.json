@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//private/tmp/**)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:3001/api/health)",
+      "Bash(curl -s -c /tmp/p.jar -X POST http://localhost:3001/api/auth/login -H 'Content-Type: application/json' -d '{\"login\":\"parent@home.com\",\"password\":\"password123\"}')",
+      "Bash(curl -s -b /tmp/p.jar http://localhost:3001/api/children)",
+      "Bash(curl -s -b /tmp/p.jar http://localhost:3001/api/auth/me)",
+      "Bash(cp /tmp/test_months.mjs _seed_months.mjs)",
+      "Bash(node _seed_months.mjs)",
+      "Bash(rm -f _seed_months.mjs)",
+      "Bash(curl -s -b /tmp/p.jar -X POST http://localhost:3001/api/chores -H 'Content-Type: application/json' -d '{\"name\":\"Walk the dog\",\"description\":\"Evening walk\",\"due_date\":\"2026-05-30\",\"reward_amount\":1.00,\"child_ids\":[2]}')",
+      "Bash(curl -s -c /tmp/b.jar -X POST http://localhost:3001/api/auth/login -H 'Content-Type: application/json' -d '{\"login\":\"bob\",\"password\":\"bobpass\"}')",
+      "Bash(docker --version)",
+      "Bash(docker info *)",
+      "Bash(docker compose *)",
+      "Bash(VITE_API_BASE=/api npm run build)"
+    ]
+  }
+}

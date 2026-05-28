@@ -1,0 +1,6 @@
+node_modules/
+chores.db
+chores.db-journal
+chores.db-wal
+chores.db-shm
+.env

@@ -1,0 +1,20 @@
+# Dependencies are installed fresh inside the image
+**/node_modules
+
+# Build output is produced inside the image
+**/dist
+**/.vite
+
+# Local SQLite database (do not bake into the image)
+server/chores.db
+server/chores.db-wal
+server/chores.db-shm
+server/chores.db-journal
+
+# Tooling / VCS / OS cruft
+.git
+.gitignore
+.claude
+**/.DS_Store
+Dockerfile
+docker-compose.yml
