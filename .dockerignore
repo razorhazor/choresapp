@@ -11,6 +11,10 @@ server/chores.db-wal
 server/chores.db-shm
 server/chores.db-journal
 
+# Generated JWT signing secret (never bake into the image)
+.jwt_secret
+**/.jwt_secret
+
 # Tooling / VCS / OS cruft
 .git
 .gitignore

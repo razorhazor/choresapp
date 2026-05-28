@@ -25,10 +25,14 @@ function parseChoreBody(body) {
   const due_date = body?.due_date ? String(body.due_date) : null;
   const reward_type = body?.reward_type === 'custom' ? 'custom' : 'financial';
   if (!name) return { error: 'Chore name is required' };
+  if (name.length > 120) return { error: 'Chore name is too long' };
+  if (description.length > 2000) return { error: 'Description is too long' };
+  if (due_date && due_date.length > 32) return { error: 'Invalid due date' };
 
   if (reward_type === 'custom') {
     const reward_text = (body?.reward_text || '').trim();
     if (!reward_text) return { error: 'Enter the custom reward' };
+    if (reward_text.length > 200) return { error: 'Custom reward is too long' };
     return { name, description, due_date, reward_type, reward_amount: 0, reward_text };
   }
 
@@ -36,6 +40,7 @@ function parseChoreBody(body) {
   if (!Number.isFinite(reward_amount) || reward_amount < 0) {
     return { error: 'Reward must be a non-negative number' };
   }
+  if (reward_amount > 1000000) return { error: 'Reward is too large' };
   return { name, description, due_date, reward_type, reward_amount, reward_text: null };
 }
 

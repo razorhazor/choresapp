@@ -19,9 +19,37 @@ const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || 'http://localhost:5173';
 const CLIENT_DIST = process.env.CLIENT_DIST || path.join(__dirname, 'public');
 
 const app = express();
+app.disable('x-powered-by'); // don't advertise the framework
+
+// Security headers (hand-rolled to avoid adding a dependency).
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('Referrer-Policy', 'no-referrer');
+  res.setHeader('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
+  res.setHeader(
+    'Content-Security-Policy',
+    [
+      "default-src 'self'",
+      "base-uri 'self'",
+      "frame-ancestors 'none'",
+      "object-src 'none'",
+      "img-src 'self' data:",
+      "style-src 'self' 'unsafe-inline'",
+      "script-src 'self'",
+      "connect-src 'self'",
+      "form-action 'self'",
+    ].join('; ')
+  );
+  // HSTS only matters (and is only honoured) over HTTPS.
+  if (req.secure || req.headers['x-forwarded-proto'] === 'https') {
+    res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+  }
+  next();
+});
 
 app.use(cors({ origin: CLIENT_ORIGIN, credentials: true }));
-app.use(express.json());
+app.use(express.json({ limit: '32kb' })); // cap request body size
 app.use(cookieParser());
 
 app.get('/api/health', (req, res) => res.json({ ok: true }));
@@ -48,6 +76,11 @@ app.use((req, res) => res.status(404).json({ error: 'Not found' }));
 
 // eslint-disable-next-line no-unused-vars
 app.use((err, req, res, next) => {
+  const status = err.status || err.statusCode;
+  // Client errors (body too large -> 413, malformed JSON -> 400) shouldn't be 500s.
+  if (status && status >= 400 && status < 500) {
+    return res.status(status).json({ error: status === 413 ? 'Request too large' : 'Bad request' });
+  }
   console.error(err);
   res.status(500).json({ error: 'Server error' });
 });

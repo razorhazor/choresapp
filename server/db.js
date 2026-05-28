@@ -71,17 +71,25 @@ function seed() {
   const { count } = db.prepare('SELECT COUNT(*) AS count FROM users').get();
   if (count > 0) return;
 
-  const email = 'parent@home.com';
-  const password = 'password123';
+  // Allow a strong initial password to be supplied via the environment so
+  // production never has to ship with the well-known default credentials.
+  const email = process.env.SEED_PARENT_EMAIL || 'parent@home.com';
+  const password = process.env.SEED_PARENT_PASSWORD || 'password123';
+  const usingDefaultPassword = !process.env.SEED_PARENT_PASSWORD;
   const hash = bcrypt.hashSync(password, 10);
   db.prepare(
     `INSERT INTO users (role, name, email, password_hash) VALUES ('parent', 'Parent', ?, ?)`
   ).run(email, hash);
 
-  console.warn(
-    `\n[seed] Created default parent account: ${email} / ${password}\n` +
-      `[seed] CHANGE THIS PASSWORD. Delete chores.db to reset the database.\n`
-  );
+  if (usingDefaultPassword) {
+    console.warn(
+      `\n[seed] Created default parent account: ${email} / ${password}\n` +
+        `[seed] WEAK DEFAULT — change it now, or set SEED_PARENT_EMAIL / ` +
+        `SEED_PARENT_PASSWORD before first run. Delete the database to re-seed.\n`
+    );
+  } else {
+    console.warn(`\n[seed] Created parent account: ${email} (password from SEED_PARENT_PASSWORD)\n`);
+  }
 }
 
 initSchema();

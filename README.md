@@ -159,11 +159,20 @@ sync. The currency symbol is configurable in [`client/src/config.js`](client/src
 
 Environment variables (all optional in dev):
 
-| Variable        | Default                          | Purpose                              |
-| --------------- | -------------------------------- | ------------------------------------ |
-| `PORT`          | `3001`                           | Port the API listens on              |
-| `JWT_SECRET`    | `dev-insecure-secret-change-me`  | Signing secret — **set this in prod**|
-| `CLIENT_ORIGIN` | `http://localhost:5173`          | Allowed CORS origin (the frontend)   |
+| Variable               | Default                   | Purpose                                                                 |
+| ---------------------- | ------------------------- | ----------------------------------------------------------------------- |
+| `PORT`                 | `3001`                    | Port the API listens on                                                 |
+| `JWT_SECRET`           | _auto-generated_          | Token signing secret. If unset (or weak), a strong random secret is generated and persisted next to the DB (`.jwt_secret`). Set an explicit strong value for multi-instance deployments. |
+| `COOKIE_SECURE`        | `false`                   | Set `true` to mark the auth cookie `Secure` (HTTPS-only)                |
+| `CLIENT_ORIGIN`        | `http://localhost:5173`   | Allowed CORS origin (the frontend)                                      |
+| `DB_PATH`              | `server/chores.db`        | SQLite file location                                                    |
+| `SEED_PARENT_EMAIL`    | `parent@home.com`         | Email for the first parent account (seeded on empty DB)                 |
+| `SEED_PARENT_PASSWORD` | `password123`             | Password for the first parent account — **set a strong value in prod**  |
+
+> Security: a weak/known `JWT_SECRET` is rejected and replaced with a generated one,
+> so tokens can't be forged with a default secret. Brute-force login is rate-limited
+> (10 failures / 15 min per IP), responses carry security headers (CSP, `X-Frame-Options`,
+> `nosniff`, etc.), and the auth cookie is `HttpOnly; SameSite=Lax`.
 
 ### Frontend (`client`)
 
@@ -181,8 +190,11 @@ This app is configured for local development. Before deploying:
    It is currently locked to `http://localhost:5173`.
 2. **API base** — update `API_BASE` in `client/src/config.js` to your deployed API URL,
    then `npm run build` in `client/` to produce static files in `client/dist/`.
-3. **Cookies over HTTPS** — in [`server/auth.js`](server/auth.js), set the cookie
-   `secure: true` (and `sameSite: 'none'` if the API and frontend are on different sites)
-   so the browser will send the auth cookie over HTTPS.
-4. **JWT secret** — set a strong `JWT_SECRET` environment variable.
+3. **Cookies over HTTPS** — set `COOKIE_SECURE=true` so the auth cookie is only sent
+   over HTTPS. (If the API and frontend are on different sites you'll also need
+   `sameSite: 'none'` in [`server/auth.js`](server/auth.js).)
+4. **JWT secret** — a strong secret is auto-generated and persisted, but for
+   multi-instance deployments set an explicit strong `JWT_SECRET`.
+5. **First parent account** — set `SEED_PARENT_PASSWORD` (and optionally
+   `SEED_PARENT_EMAIL`) before first run so you never ship the default credentials.
 ```

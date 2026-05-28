@@ -17,6 +17,10 @@ server/chores.db-wal
 server/chores.db-shm
 server/chores.db-journal
 
+# Generated JWT signing secret (never commit)
+.jwt_secret
+**/.jwt_secret
+
 # Environment
 .env
 **/.env

@@ -5,10 +5,14 @@ services:
     ports:
       - "3001:3001"
     environment:
-      # CHANGE THIS to a strong random value in production.
-      JWT_SECRET: redacted-placeholder
       PORT: "3001"
       DB_PATH: /app/data/chores.db
+      # A strong JWT signing secret is auto-generated and persisted on the volume
+      # (/app/data/.jwt_secret). For multi-instance deployments set an explicit one:
+      #   JWT_SECRET: "<a long random string>"
+      # Recommended for any internet-facing deployment:
+      #   COOKIE_SECURE: "true"          # only send the auth cookie over HTTPS
+      #   SEED_PARENT_PASSWORD: "<strong password for the first parent account>"
     volumes:
       # Persists the SQLite database across container restarts/rebuilds.
       - chores-data:/app/data

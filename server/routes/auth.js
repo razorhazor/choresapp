@@ -5,6 +5,28 @@ import { signToken, cookieOptions, authMiddleware, COOKIE_NAME } from '../auth.j
 
 const router = Router();
 
+// --- In-memory login rate limiting (per IP, failure-counted) ---
+// Dependency-free brute-force mitigation. Resets on restart and is per-instance,
+// which is acceptable for this single-container app.
+const MAX_FAILURES = 10;
+const WINDOW_MS = 15 * 60 * 1000;
+const loginFailures = new Map(); // ip -> { count, resetAt }
+
+function isLockedOut(ip) {
+  const rec = loginFailures.get(ip);
+  return Boolean(rec && Date.now() < rec.resetAt && rec.count >= MAX_FAILURES);
+}
+function recordFailure(ip) {
+  const now = Date.now();
+  let rec = loginFailures.get(ip);
+  if (!rec || now > rec.resetAt) rec = { count: 0, resetAt: now + WINDOW_MS };
+  rec.count += 1;
+  loginFailures.set(ip, rec);
+  if (loginFailures.size > 1000) {
+    for (const [k, v] of loginFailures) if (now > v.resetAt) loginFailures.delete(k);
+  }
+}
+
 // Running total of approved *financial* rewards for a child (custom rewards
 // are free text and are tallied separately, not summed into the money total).
 function rewardTotal(childId) {
@@ -81,8 +103,21 @@ function publicUser(user) {
 // POST /api/auth/login — accepts a single "login" field matched against
 // email (parents) or username (children).
 router.post('/login', (req, res) => {
+  const ip = req.ip || req.socket?.remoteAddress || 'unknown';
+  if (isLockedOut(ip)) {
+    res.setHeader('Retry-After', String(Math.ceil(WINDOW_MS / 1000)));
+    return res.status(429).json({ error: 'Too many login attempts. Try again later.' });
+  }
+
   const { login, password } = req.body || {};
-  if (!login || !password) {
+  if (
+    !login ||
+    !password ||
+    typeof login !== 'string' ||
+    typeof password !== 'string' ||
+    login.length > 200 ||
+    password.length > 200
+  ) {
     return res.status(400).json({ error: 'Login and password are required' });
   }
 
@@ -91,9 +126,11 @@ router.post('/login', (req, res) => {
     .get(login, login);
 
   if (!user || !bcrypt.compareSync(password, user.password_hash)) {
+    recordFailure(ip);
     return res.status(401).json({ error: 'Invalid credentials' });
   }
 
+  loginFailures.delete(ip); // clear on success
   res.cookie(COOKIE_NAME, signToken(user), cookieOptions());
   res.json({ user: publicUser(user) });
 });

@@ -28,6 +28,15 @@ router.post('/', (req, res) => {
   if (!name || !username || !password) {
     return res.status(400).json({ error: 'Name, username and password are required' });
   }
+  if (typeof name !== 'string' || typeof username !== 'string' || typeof password !== 'string') {
+    return res.status(400).json({ error: 'Invalid input' });
+  }
+  if (name.length > 120 || username.length > 60) {
+    return res.status(400).json({ error: 'Name or username is too long' });
+  }
+  if (password.length < 4 || password.length > 200) {
+    return res.status(400).json({ error: 'Password must be 4-200 characters' });
+  }
 
   const exists = db.prepare('SELECT id FROM users WHERE username = ?').get(username);
   if (exists) return res.status(409).json({ error: 'Username already taken' });
