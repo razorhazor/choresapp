@@ -90,7 +90,7 @@ Open http://localhost:3001.
 
 ### Docker notes
 
-- **First run** seeds the same parent account (`parent@home.com` / `password123`) — the
+- **First run** seeds the same parent account (`parent` / `password123`) — the
   credentials are printed in the container logs. Change them before real use.
 - **Reset the database:** remove the volume, e.g. `docker compose down -v`
   (compose) or `docker volume rm chores-data` (plain docker). It re-seeds on next start.
@@ -106,7 +106,7 @@ On its **first run** the backend creates a single parent account and prints the
 credentials to the console:
 
 ```
-Email:    parent@home.com
+Login:    parent
 Password: password123
 ```
 
@@ -167,7 +167,7 @@ Environment variables (all optional in dev):
 | `COOKIE_SECURE`        | `false`                   | Set `true` to mark the auth cookie `Secure` (HTTPS-only)                |
 | `CLIENT_ORIGIN`        | `http://localhost:5173`   | Allowed CORS origin (the frontend)                                      |
 | `DB_PATH`              | `server/chores.db`        | SQLite file location                                                    |
-| `SEED_PARENT_EMAIL`    | `parent@home.com`         | Email for the first parent account (seeded on empty DB)                 |
+| `SEED_PARENT_EMAIL`    | `parent`                  | Login id for the first parent account (seeded on empty DB)              |
 | `SEED_PARENT_PASSWORD` | `password123`             | Password for the first parent account — **set a strong value in prod**  |
 
 > Security: a weak/known `JWT_SECRET` is rejected and replaced with a generated one,

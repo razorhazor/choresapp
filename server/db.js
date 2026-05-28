@@ -73,7 +73,7 @@ function seed() {
 
   // Allow a strong initial password to be supplied via the environment so
   // production never has to ship with the well-known default credentials.
-  const email = process.env.SEED_PARENT_EMAIL || 'parent@home.com';
+  const email = process.env.SEED_PARENT_EMAIL || 'parent';
   const password = process.env.SEED_PARENT_PASSWORD || 'password123';
   const usingDefaultPassword = !process.env.SEED_PARENT_PASSWORD;
   const hash = bcrypt.hashSync(password, 10);

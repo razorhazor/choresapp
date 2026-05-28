@@ -40,7 +40,7 @@ export default function LoginPage() {
             autoComplete="username"
             value={loginValue}
             onChange={(e) => setLoginValue(e.target.value)}
-            placeholder="parent@home.com or username"
+            placeholder="e.g. parent or a child's username"
             required
           />
           <label htmlFor="password">Password</label>
